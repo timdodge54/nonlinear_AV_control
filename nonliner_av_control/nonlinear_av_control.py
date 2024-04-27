@@ -125,15 +125,40 @@ class VehicleSim:
         return v, phi_r
 
     def get_sliding_mode_control(
-        xe: float,
-        ye: float,
-        thetae: float,
-        vr: float, wr: float) -> tuple[float, float]:
-        return 0, 0
+            self,
+            xe: float,
+            ye: float,
+            thetae: float,
+            vd: float,
+            omega_d: float,
+            thetad_dot: float,
+            vr: float) -> tuple[float, float]:
+        xe = -xe
+        ye = -ye
+        thetae = -thetae
+        xe_dot = -vd + vr*np.cos(thetae) + ye*omega_d
+        ye_dot = self.vr_prev*np.sin(thetae)-xe*omega_d
+        thetae_dot = vr/self.wheel_base*(self.phi_r_prev) - omega_d
+        k0, k1, k2 = 1, 1, 1
+        Q1, Q2 = 1, 1
+        P1, P2 = 1, 1
+        s1 = xe_dot + k1*xe
+        s2 = ye_dot + k2 * ye + k0*np.sign(ye)*thetae
 
+        vc_dot = 1/np.cos(thetae)*(-Q1*s1-P1*np.sign(s1)-k1*xe_dot -
+                                   omega_d*ye_dot - +
+                                   self.vr_prev*thetae_dot*np.sin(thetae))
+        phi_c = omega_d + (vr*np.cos(thetae)+k0*np.sign(ye)**(-1)
+                           * (-Q2*s2-P2*np.sign(s2) - k2*ye_dot +
+        return 0., 0.
 
-    def getReward(self, xe: float, ye: float, thetae: float, vr: float, vd: float) -> float:
-        reward = 0
+    def getReward(self,
+                  xe: float,
+                  ye: float,
+                  thetae: float,
+                  vr: float,
+                  vd: float) -> float:
+        reward=0
         if abs(xe) < 0.1:
             reward += 1
         elif abs(xe) < 0.5:
@@ -160,73 +185,71 @@ class VehicleSim:
             reward -= 2
         if abs(vr - vd) < 0.1:
             reward += .2
-            
         return reward
 
-
     def simulate(self, tspan):
-        sol = odeint(self.f, self.x0, tspan)
+        sol=odeint(self.f, self.x0, tspan)
         return sol, tspan
 
 
 if __name__ == "__main__":
 
     # Import the data from the CSV file
-    data = np.genfromtxt('output.csv', delimiter=',', skip_header=1)
+    data=np.genfromtxt('../output.csv', delimiter=',', skip_header=1)
     # Convert angles from degrees to radians
-    thetad = data[:, 0] * math.pi / 180
+    thetad=data[:, 0] * math.pi / 180
     # x and y are swapped because of the sign convention of theta and theta_dot
-    yd = data[:, 2]
-    xd = data[:, 1]
-    vd = data[:, 3]
-    omega_d = data[:, 4]
-    t_vec = data[:, 5]
-    wheel_base = 2.8
+    yd=data[:, 2]
+    xd=data[:, 1]
+    vd=data[:, 3]
+    omega_d=data[:, 4]
+    t_vec=data[:, 5]
+    wheel_base=2.8
     # calculate the given steering angle which can be done because the
     # desired trajectory has a constant linear velocity
-    phi_d = np.arctan(wheel_base / vd[0] * omega_d)
+    phi_d=np.arctan(wheel_base / vd[0] * omega_d)
 
-    x0 = [xd[0], yd[0], thetad[0], 0]
-    tf = 63.8
-    tspan = np.arange(0, tf, 0.01)
-    controller_type = 1
+    x0=[xd[0], yd[0], thetad[0], 0]
+    tf=63.8
+    tspan=np.arange(0, tf, 0.01)
+    controller_type=1
 
     # Create the vehicle object
-    vehicle = VehicleSim(x0[0], x0[1], x0[2], wheel_base,
+    vehicle=VehicleSim(x0[0], x0[1], x0[2], wheel_base,
                          vd, thetad, yd, xd, omega_d, phi_d)
     # Simulate the vehicle
-    x, t = vehicle.simulate(tspan)
+    x, t=vehicle.simulate(tspan)
 
-    control = np.zeros((len(t), 2))
+    control=np.zeros((len(t), 2))
 
     # Calculate the control inputs for the vehicle
     for i in range(len(t)):
-        time = t[i]
-        index = int(time * 100) + 2
-        index = min(index, len(vd) - 1)
-        index = int(index)
-        vd_ = vd[index]
-        thetad_ = thetad[index]
-        thetaddot_ = omega_d[index]
-        xd_ = xd[index]
-        yd_ = yd[index]
-        phid_ = phi_d[index]
-        x_ = x[i, 0]
-        y_ = x[i, 1]
-        theta_ = x[i, 2]
-        rotation_matrix = np.array([
+        time=t[i]
+        index=int(time * 100) + 2
+        index=min(index, len(vd) - 1)
+        index=int(index)
+        vd_=vd[index]
+        thetad_=thetad[index]
+        thetaddot_=omega_d[index]
+        xd_=xd[index]
+        yd_=yd[index]
+        phid_=phi_d[index]
+        x_=x[i, 0]
+        y_=x[i, 1]
+        theta_=x[i, 2]
+        rotation_matrix=np.array([
             [np.cos(theta_), np.sin(theta_), 0],
             [-np.sin(theta_), np.cos(theta_), 0],
             [0, 0, 1]
         ])
-        thetadiff = thetad_ - theta_
-        thetadiff = np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
-        vec_diff = np.array([xd_ - x_, yd_ - y_, thetad_ - theta_])
-        vec_e = np.dot(rotation_matrix, vec_diff)
-        xe = vec_e[0]
-        ye = vec_e[1]
-        thetae = vec_e[2]
-        control[i, :] = vehicle.get_lyap_control(
+        thetadiff=thetad_ - theta_
+        thetadiff=np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
+        vec_diff=np.array([xd_ - x_, yd_ - y_, thetad_ - theta_])
+        vec_e=np.dot(rotation_matrix, vec_diff)
+        xe=vec_e[0]
+        ye=vec_e[1]
+        thetae=vec_e[2]
+        control[i, :]=vehicle.get_lyap_control(
             vr=vd_, wr=thetaddot_, thetae=thetae, xe=xe, ye=ye)
 
     # Plotting
@@ -259,8 +282,7 @@ if __name__ == "__main__":
     # space plots so titles don't overlap
     plt.subplots_adjust(hspace=0.5)
 
-
-    fig, ax = plt.subplots(1)
+    fig, ax=plt.subplots(1)
     ax.plot(xd, yd, '--', label='Desired path', linewidth=1.5, color='black')
     ax.plot(x[:, 0], x[:, 1], label='Path', linewidth=1.5, color='blue')
     ax.set_aspect('equal')
