@@ -224,21 +224,21 @@
         "documentation": {}
     },
     {
-        "label": "VehicleSim",
-        "kind": 6,
-        "importPath": "nonliner_av_control.nonlinear_av_control",
-        "description": "nonliner_av_control.nonlinear_av_control",
-        "peekOfCode": "class VehicleSim:\n    \"\"\"Class that a houses the vehicle dynamics, controller, and sim.\n    The vehicle is modeled as a point mass with a bicycle model.\n    The controller is a lyapunov controller that uses the error in the\n    orientation and position of the vehicle to generate control inputs.\n    Attributes:\n        self.x0: Initial state of the vehicle\n        self.wheel_base: Length of the wheelbase of the vehicle\n        self.controller_type: Type of controller to use\n        self.vd: list of desired velocities for waypoints",
-        "detail": "nonliner_av_control.nonlinear_av_control",
-        "documentation": {}
-    },
-    {
         "label": "ReplayBuffer",
         "kind": 6,
         "importPath": "nonliner_av_control.ReplayBuffer",
         "description": "nonliner_av_control.ReplayBuffer",
         "peekOfCode": "class ReplayBuffer:\n    def __init__(self, max_size, input_shape, n_actions):\n        self.mem_size = max_size\n        self.mem_cntr = 0\n        self.state_memory = np.zeros((self.mem_size, *input_shape))\n        self.new_state_memory = np.zeros((self.mem_size, *input_shape))\n        self.action_memory = np.zeros((self.mem_size, n_actions))\n        self.reward_memory = np.zeros(self.mem_size)\n        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)\n    def store_transition(self, state, action, reward, state_, done):",
         "detail": "nonliner_av_control.ReplayBuffer",
+        "documentation": {}
+    },
+    {
+        "label": "VehicleSim",
+        "kind": 6,
+        "importPath": "nonliner_av_control.nonlinear_av_control",
+        "description": "nonliner_av_control.nonlinear_av_control",
+        "peekOfCode": "class VehicleSim:\n    \"\"\"Class that a houses the vehicle dynamics, controller, and sim.\n    The vehicle is modeled as a point mass with a bicycle model.\n    The controller is a lyapunov controller that uses the error in the\n    orientation and position of the vehicle to generate control inputs.\n    Attributes:\n        self.x0: Initial state of the vehicle\n        self.wheel_base: Length of the wheelbase of the vehicle\n        self.controller_type: Type of controller to use\n        self.vd: list of desired velocities for waypoints",
+        "detail": "nonliner_av_control.nonlinear_av_control",
         "documentation": {}
     },
     {
