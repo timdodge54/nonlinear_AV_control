@@ -1,11 +1,121 @@
 [
     {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
         "label": "numpy",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "numpy",
         "description": "numpy",
         "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "torch",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "torch",
+        "description": "torch",
+        "detail": "torch",
+        "documentation": {}
+    },
+    {
+        "label": "torch.nn",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "torch.nn",
+        "description": "torch.nn",
+        "detail": "torch.nn",
+        "documentation": {}
+    },
+    {
+        "label": "torch.nn.functional",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "torch.nn.functional",
+        "description": "torch.nn.functional",
+        "detail": "torch.nn.functional",
+        "documentation": {}
+    },
+    {
+        "label": "torch.optim",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "torch.optim",
+        "description": "torch.optim",
+        "detail": "torch.optim",
+        "documentation": {}
+    },
+    {
+        "label": "get_package_share_directory",
+        "importPath": "ament_index_python.packages",
+        "description": "ament_index_python.packages",
+        "isExtraImport": true,
+        "detail": "ament_index_python.packages",
+        "documentation": {}
+    },
+    {
+        "label": "get_package_share_directory",
+        "importPath": "ament_index_python.packages",
+        "description": "ament_index_python.packages",
+        "isExtraImport": true,
+        "detail": "ament_index_python.packages",
+        "documentation": {}
+    },
+    {
+        "label": "ActorNetwork",
+        "importPath": "nonlinear_av_control.ActorNetwork",
+        "description": "nonlinear_av_control.ActorNetwork",
+        "isExtraImport": true,
+        "detail": "nonlinear_av_control.ActorNetwork",
+        "documentation": {}
+    },
+    {
+        "label": "CriticNetwork",
+        "importPath": "nonlinear_av_control.CriticNetwork",
+        "description": "nonlinear_av_control.CriticNetwork",
+        "isExtraImport": true,
+        "detail": "nonlinear_av_control.CriticNetwork",
+        "documentation": {}
+    },
+    {
+        "label": "OUActionNoise",
+        "importPath": "nonlinear_av_control.OUActionNoise",
+        "description": "nonlinear_av_control.OUActionNoise",
+        "isExtraImport": true,
+        "detail": "nonlinear_av_control.OUActionNoise",
+        "documentation": {}
+    },
+    {
+        "label": "ReplayBuffer",
+        "importPath": "nonlinear.ReplayBuffer",
+        "description": "nonlinear.ReplayBuffer",
+        "isExtraImport": true,
+        "detail": "nonlinear.ReplayBuffer",
+        "documentation": {}
+    },
+    {
+        "label": "gym",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "gym",
+        "description": "gym",
+        "detail": "gym",
+        "documentation": {}
+    },
+    {
+        "label": "Agent",
+        "importPath": "ddpg_planning.Agent",
+        "description": "ddpg_planning.Agent",
+        "isExtraImport": true,
+        "detail": "ddpg_planning.Agent",
         "documentation": {}
     },
     {
@@ -44,12 +154,118 @@
         "documentation": {}
     },
     {
+        "label": "find_packages",
+        "importPath": "setuptools",
+        "description": "setuptools",
+        "isExtraImport": true,
+        "detail": "setuptools",
+        "documentation": {}
+    },
+    {
+        "label": "setup",
+        "importPath": "setuptools",
+        "description": "setuptools",
+        "isExtraImport": true,
+        "detail": "setuptools",
+        "documentation": {}
+    },
+    {
+        "label": "ActorNetwork",
+        "kind": 6,
+        "importPath": "nonliner_av_control.ActorNetwork",
+        "description": "nonliner_av_control.ActorNetwork",
+        "peekOfCode": "class ActorNetwork(nn.Module):\n    def __init__(\n        self,\n        alpha,\n        input_dims,\n        fc1_dims,\n        fc2_dims,\n        fc3_dims,\n        n_actions,\n        action_range,",
+        "detail": "nonliner_av_control.ActorNetwork",
+        "documentation": {}
+    },
+    {
+        "label": "Agent",
+        "kind": 6,
+        "importPath": "nonliner_av_control.Agent",
+        "description": "nonliner_av_control.Agent",
+        "peekOfCode": "class Agent:\n    def __init__(\n        self,\n        alpha,\n        beta,\n        input_dims,\n        tau,\n        n_actions,\n        gamma=0.99,\n        max_size=1000000,",
+        "detail": "nonliner_av_control.Agent",
+        "documentation": {}
+    },
+    {
+        "label": "CriticNetwork",
+        "kind": 6,
+        "importPath": "nonliner_av_control.CriticNetwork",
+        "description": "nonliner_av_control.CriticNetwork",
+        "peekOfCode": "class CriticNetwork(nn.Module):\n    def __init__(\n        self,\n        beta,\n        input_dims,\n        fc1_dims,\n        fc2_dims,\n        fc3_dims,\n        n_actions,\n        name,",
+        "detail": "nonliner_av_control.CriticNetwork",
+        "documentation": {}
+    },
+    {
+        "label": "env",
+        "kind": 5,
+        "importPath": "nonliner_av_control.Evalddpg",
+        "description": "nonliner_av_control.Evalddpg",
+        "peekOfCode": "env = gym.make(\"LunarLanderContinuous-v2\", render_mode=\"human\")\nagent = Agent(\n    alpha=0.000025,\n    beta=0.00025,\n    input_dims=[8],\n    tau=0.001,\n    batch_size=64,\n    fc1_dims=400,\n    fc2_dims=300,\n    n_actions=2,",
+        "detail": "nonliner_av_control.Evalddpg",
+        "documentation": {}
+    },
+    {
+        "label": "agent",
+        "kind": 5,
+        "importPath": "nonliner_av_control.Evalddpg",
+        "description": "nonliner_av_control.Evalddpg",
+        "peekOfCode": "agent = Agent(\n    alpha=0.000025,\n    beta=0.00025,\n    input_dims=[8],\n    tau=0.001,\n    batch_size=64,\n    fc1_dims=400,\n    fc2_dims=300,\n    n_actions=2,\n)",
+        "detail": "nonliner_av_control.Evalddpg",
+        "documentation": {}
+    },
+    {
+        "label": "score_history",
+        "kind": 5,
+        "importPath": "nonliner_av_control.Evalddpg",
+        "description": "nonliner_av_control.Evalddpg",
+        "peekOfCode": "score_history = []\nfor i in range(10):\n    done = False\n    score = 0\n    obs = env.reset()[0]\n    while not done:\n        act = agent.choose_action(obs)\n        new_state, reward, done, info, _ = env.step(act)\n        score += reward\n        obs = new_state",
+        "detail": "nonliner_av_control.Evalddpg",
+        "documentation": {}
+    },
+    {
         "label": "VehicleSim",
         "kind": 6,
-        "importPath": "nonlinear_av_control",
-        "description": "nonlinear_av_control",
+        "importPath": "nonliner_av_control.nonlinear_av_control",
+        "description": "nonliner_av_control.nonlinear_av_control",
         "peekOfCode": "class VehicleSim:\n    \"\"\"Class that a houses the vehicle dynamics, controller, and sim.\n    The vehicle is modeled as a point mass with a bicycle model.\n    The controller is a lyapunov controller that uses the error in the\n    orientation and position of the vehicle to generate control inputs.\n    Attributes:\n        self.x0: Initial state of the vehicle\n        self.wheel_base: Length of the wheelbase of the vehicle\n        self.controller_type: Type of controller to use\n        self.vd: list of desired velocities for waypoints",
-        "detail": "nonlinear_av_control",
+        "detail": "nonliner_av_control.nonlinear_av_control",
+        "documentation": {}
+    },
+    {
+        "label": "ReplayBuffer",
+        "kind": 6,
+        "importPath": "nonliner_av_control.ReplayBuffer",
+        "description": "nonliner_av_control.ReplayBuffer",
+        "peekOfCode": "class ReplayBuffer:\n    def __init__(self, max_size, input_shape, n_actions):\n        self.mem_size = max_size\n        self.mem_cntr = 0\n        self.state_memory = np.zeros((self.mem_size, *input_shape))\n        self.new_state_memory = np.zeros((self.mem_size, *input_shape))\n        self.action_memory = np.zeros((self.mem_size, n_actions))\n        self.reward_memory = np.zeros(self.mem_size)\n        self.terminal_memory = np.zeros(self.mem_size, dtype=np.bool)\n    def store_transition(self, state, action, reward, state_, done):",
+        "detail": "nonliner_av_control.ReplayBuffer",
+        "documentation": {}
+    },
+    {
+        "label": "thelibFolder",
+        "kind": 5,
+        "importPath": "setup",
+        "description": "setup",
+        "peekOfCode": "thelibFolder = os.path.dirname(os.path.realpath(__file__))\nrequirementPath = thelibFolder + \"/requirements.txt\"\ninstall_requires = []\nif os.path.isfile(requirementPath):\n    with open(requirementPath) as f:\n        install_requires = f.read().splitlines()\nsetup(\n    name=\"nonliner_av_control\",\n    # install_requires=install_requires,\n    packages=find_packages(),",
+        "detail": "setup",
+        "documentation": {}
+    },
+    {
+        "label": "requirementPath",
+        "kind": 5,
+        "importPath": "setup",
+        "description": "setup",
+        "peekOfCode": "requirementPath = thelibFolder + \"/requirements.txt\"\ninstall_requires = []\nif os.path.isfile(requirementPath):\n    with open(requirementPath) as f:\n        install_requires = f.read().splitlines()\nsetup(\n    name=\"nonliner_av_control\",\n    # install_requires=install_requires,\n    packages=find_packages(),\n)",
+        "detail": "setup",
+        "documentation": {}
+    },
+    {
+        "label": "install_requires",
+        "kind": 5,
+        "importPath": "setup",
+        "description": "setup",
+        "peekOfCode": "install_requires = []\nif os.path.isfile(requirementPath):\n    with open(requirementPath) as f:\n        install_requires = f.read().splitlines()\nsetup(\n    name=\"nonliner_av_control\",\n    # install_requires=install_requires,\n    packages=find_packages(),\n)",
+        "detail": "setup",
         "documentation": {}
     }
 ]

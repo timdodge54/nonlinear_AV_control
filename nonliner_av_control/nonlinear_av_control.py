@@ -31,12 +31,12 @@ class VehicleSim:
             y0: float,
             theta0: float,
             wheel_base: float,
-            vd: npt.NDArray,
-            thetad: npt.NDArray,
-            yd: npt.NDArray,
-            xd: npt.NDArray,
-            thetaddot: npt.NDArray,
-            phid: npt.NDArray) -> None:
+            vd: npt.NDArray[np.float64],
+            thetad: npt.NDArray[np.float64],
+            yd: npt.NDArray[np.float64],
+            xd: npt.NDArray[np.float64],
+            thetaddot: npt.NDArray[np.float64],
+            phid: npt.NDArray[np.float64]) -> None:
         """Initialize.
         """
         self.x0 = np.array([x0, y0, theta0])
@@ -50,8 +50,9 @@ class VehicleSim:
         self.phid = phid
         self.vr_prev = 0.
         self.phi_r_prev = 0.
+        self.v_c0 = 0.
 
-    def f(self, state: npt.NDArray, t: float) -> npt.NDArray:
+    def f(self, state: npt.NDArray[np.float64], t: float) -> npt.NDArray[np.float64]:
         """Calculate the dynamics of the vehicle.
 
         Args:
@@ -76,12 +77,12 @@ class VehicleSim:
         theta = state.item(2)
         wheel_base = self.wheel_base
         # Calculate the error in orientation and position
-        rotation_matrix = np.array([
+        rotation_matrix: npt.NDArray[np.float64] = np.array([
             [np.cos(theta), np.sin(theta), 0],
             [-np.sin(theta), np.cos(theta), 0],
             [0, 0, 1]
         ])
-        thetadiff = thetar - theta
+        thetadiff: np.float64 = thetar - theta
         thetadiff = np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
         vec_diff = np.array([xr - x, yr - y, thetar - theta])
         vec_e = np.dot(rotation_matrix, vec_diff)
@@ -123,6 +124,38 @@ class VehicleSim:
         phi_r = np.arctan(self.wheel_base * w / v)
         return v, phi_r
 
+    def getReward(self, xe, ye, thetae, vr, vd):
+        reward = 0
+        if abs(xe) < 0.1:
+            reward += 1
+        elif abs(xe) < 0.5:
+            reward += 0.5
+        elif abs(xe) < 1:
+            reward += 0.1
+        else:
+            reward -= 1
+        if abs(ye) < 0.1:
+            reward += 1
+        elif abs(ye) < 0.5:
+            reward += 0.5
+        elif abs(ye) < 1:
+            reward += 0.1
+        else:
+            reward -= 1
+        if abs(thetae) < 0.01:
+            reward += 1
+        elif abs(thetae) < 0.05:
+            reward += 0.5
+        elif abs(thetae) < 0.1:
+            reward += 0.1
+        else:
+            reward -= 2
+        if abs(vr - vd) < 0.1:
+            reward += .2
+            
+        return reward
+
+
     def simulate(self, tspan):
         sol = odeint(self.f, self.x0, tspan)
         return sol, tspan
@@ -158,6 +191,7 @@ if __name__ == "__main__":
 
     control = np.zeros((len(t), 2))
 
+    # Calculate the control inputs for the vehicle
     for i in range(len(t)):
         time = t[i]
         index = int(time * 100) + 2
