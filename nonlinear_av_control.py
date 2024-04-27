@@ -77,7 +77,7 @@ class VehicleSim:
         wheel_base = self.wheel_base
         # Calculate the error in orientation and position
         rotation_matrix = np.array([
-            [np.cos(theta), -np.sin(theta), 0],
+            [np.cos(theta), np.sin(theta), 0],
             [-np.sin(theta), np.cos(theta), 0],
             [0, 0, 1]
         ])
@@ -116,7 +116,7 @@ class VehicleSim:
             xe: error in x position
             ye: error in y position
         """
-        k1, k2, k3 = 1, 3, 2
+        k1, k2, k3 = 1.2, 3.8, 2.4
         v = k1 * xe + vr*np.cos(thetae)
         print(v)
         w = wr + vr*(k2*ye + k3*np.sin(thetae))
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     phi_d = np.arctan(wheel_base / vd[0] * omega_d)
 
     x0 = [xd[0], yd[0], thetad[0], 0]
-    tf = 15
+    tf = 63.8
     tspan = np.arange(0, tf, 0.01)
     controller_type = 1
 
@@ -173,7 +173,7 @@ if __name__ == "__main__":
         y_ = x[i, 1]
         theta_ = x[i, 2]
         rotation_matrix = np.array([
-            [np.cos(theta_), -np.sin(theta_), 0],
+            [np.cos(theta_), np.sin(theta_), 0],
             [-np.sin(theta_), np.cos(theta_), 0],
             [0, 0, 1]
         ])
@@ -215,7 +215,8 @@ if __name__ == "__main__":
     plt.plot(t, control[:, 1], label='phi', linewidth=1.5)
     plt.title("Steering control")
     # space plots so titles don't overlap
-    plt.tight_layout()
+    plt.subplots_adjust(hspace=0.5)
+
 
     fig, ax = plt.subplots(1)
     ax.plot(xd, yd, '--', label='Desired path', linewidth=1.5, color='black')

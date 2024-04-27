@@ -1,0 +1,55 @@
+[
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "matplotlib.pyplot",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "matplotlib.pyplot",
+        "description": "matplotlib.pyplot",
+        "detail": "matplotlib.pyplot",
+        "documentation": {}
+    },
+    {
+        "label": "odeint",
+        "importPath": "scipy.integrate",
+        "description": "scipy.integrate",
+        "isExtraImport": true,
+        "detail": "scipy.integrate",
+        "documentation": {}
+    },
+    {
+        "label": "math",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "math",
+        "description": "math",
+        "detail": "math",
+        "documentation": {}
+    },
+    {
+        "label": "numpy.typing",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy.typing",
+        "description": "numpy.typing",
+        "detail": "numpy.typing",
+        "documentation": {}
+    },
+    {
+        "label": "VehicleSim",
+        "kind": 6,
+        "importPath": "nonlinear_av_control",
+        "description": "nonlinear_av_control",
+        "peekOfCode": "class VehicleSim:\n    \"\"\"Class that a houses the vehicle dynamics, controller, and sim.\n    The vehicle is modeled as a point mass with a bicycle model.\n    The controller is a lyapunov controller that uses the error in the\n    orientation and position of the vehicle to generate control inputs.\n    Attributes:\n        self.x0: Initial state of the vehicle\n        self.wheel_base: Length of the wheelbase of the vehicle\n        self.controller_type: Type of controller to use\n        self.vd: list of desired velocities for waypoints",
+        "detail": "nonlinear_av_control",
+        "documentation": {}
+    }
+]
