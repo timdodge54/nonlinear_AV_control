@@ -124,7 +124,15 @@ class VehicleSim:
         phi_r = np.arctan(self.wheel_base * w / v)
         return v, phi_r
 
-    def getReward(self, xe, ye, thetae, vr, vd):
+    def get_sliding_mode_control(
+        xe: float,
+        ye: float,
+        thetae: float,
+        vr: float, wr: float) -> tuple[float, float]:
+        return 0, 0
+
+
+    def getReward(self, xe: float, ye: float, thetae: float, vr: float, vd: float) -> float:
         reward = 0
         if abs(xe) < 0.1:
             reward += 1
