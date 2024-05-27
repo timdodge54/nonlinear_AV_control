@@ -63,12 +63,13 @@ class TrajectoryEnv(gym.Env):
         v = action[0]
         phi = action[1]
         # Update the state
-        def f(x, y, theta, v, phi):
+        def f(state):
+            theta_ = state[2]
             return np.array(
-                [v * np.cos(theta),
-                 v * np.sin(theta),
+                [v * np.cos(theta_),
+                 v * np.sin(theta_),
                  v * np.tan(phi) / self.wheelbase])
-        sol = odeint(f, self.state, [self.t, self.t + self.dt], args=(v, phi))
+        sol = odeint(f, self.state, [self.t, self.t + self.dt])
         new_x, new_y, new_theta = sol[-1]
         new_theta = np.arctan(np.sin(new_theta) / np.cos(new_theta))
         if new_x < -1000 or new_x > 1000 or new_y < -1000 or new_y > 1000:
