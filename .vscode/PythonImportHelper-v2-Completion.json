@@ -111,6 +111,14 @@
         "documentation": {}
     },
     {
+        "label": "spaces",
+        "importPath": "gym",
+        "description": "gym",
+        "isExtraImport": true,
+        "detail": "gym",
+        "documentation": {}
+    },
+    {
         "label": "Agent",
         "importPath": "ddpg_planning.Agent",
         "description": "ddpg_planning.Agent",
@@ -125,6 +133,14 @@
         "importPath": "matplotlib.pyplot",
         "description": "matplotlib.pyplot",
         "detail": "matplotlib.pyplot",
+        "documentation": {}
+    },
+    {
+        "label": "odeint",
+        "importPath": "scipy.integrate",
+        "description": "scipy.integrate",
+        "isExtraImport": true,
+        "detail": "scipy.integrate",
         "documentation": {}
     },
     {
@@ -151,6 +167,15 @@
         "importPath": "numpy.typing",
         "description": "numpy.typing",
         "detail": "numpy.typing",
+        "documentation": {}
+    },
+    {
+        "label": "pygame",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pygame",
+        "description": "pygame",
+        "detail": "pygame",
         "documentation": {}
     },
     {
@@ -224,6 +249,15 @@
         "documentation": {}
     },
     {
+        "label": "VehicleSim",
+        "kind": 6,
+        "importPath": "nonliner_av_control.nonlinear_av_control",
+        "description": "nonliner_av_control.nonlinear_av_control",
+        "peekOfCode": "class VehicleSim:\n    \"\"\"Class that a houses the vehicle dynamics, controller, and sim.\n    The vehicle is modeled as a point mass with a bicycle model.\n    The controller is a lyapunov controller that uses the error in the\n    orientation and position of the vehicle to generate control inputs.\n    Attributes:\n        self.x0: Initial state of the vehicle\n        self.wheel_base: Length of the wheelbase of the vehicle\n        self.controller_type: Type of controller to use\n        self.vd: list of desired velocities for waypoints",
+        "detail": "nonliner_av_control.nonlinear_av_control",
+        "documentation": {}
+    },
+    {
         "label": "ReplayBuffer",
         "kind": 6,
         "importPath": "nonliner_av_control.ReplayBuffer",
@@ -233,12 +267,12 @@
         "documentation": {}
     },
     {
-        "label": "VehicleSim",
+        "label": "TrajectoryEnv",
         "kind": 6,
-        "importPath": "nonliner_av_control.nonlinear_av_control",
-        "description": "nonliner_av_control.nonlinear_av_control",
-        "peekOfCode": "class VehicleSim:\n    \"\"\"Class that a houses the vehicle dynamics, controller, and sim.\n    The vehicle is modeled as a point mass with a bicycle model.\n    The controller is a lyapunov controller that uses the error in the\n    orientation and position of the vehicle to generate control inputs.\n    Attributes:\n        self.x0: Initial state of the vehicle\n        self.wheel_base: Length of the wheelbase of the vehicle\n        self.controller_type: Type of controller to use\n        self.vd: list of desired velocities for waypoints",
-        "detail": "nonliner_av_control.nonlinear_av_control",
+        "importPath": "nonliner_av_control.trajectoryEnv",
+        "description": "nonliner_av_control.trajectoryEnv",
+        "peekOfCode": "class TrajectoryEnv(gym.Env):\n    metadata = {'render.modes': ['human', 'rgb_array'], 'render_fps': 4}\n    def __init__(self, dt=.01, render_mode='rgb_array'):\n        super(TrajectoryEnv, self).__init__()\n        self.window_size = 512\n        self.action_space = spaces.Box(\n            low=np.array([-100., -np.pi], dtype=np.float32), \n            high=np.array([100., np.pi]), dtype=np.float32)\n        self.obeservation_space = spaces.Box(\n            low=np.array([-1000., -1000., 0.0]),",
+        "detail": "nonliner_av_control.trajectoryEnv",
         "documentation": {}
     },
     {

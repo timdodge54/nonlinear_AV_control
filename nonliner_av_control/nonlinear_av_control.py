@@ -347,7 +347,7 @@ if __name__ == "__main__":
 
     # Import the data from the CSV file
     file_total_path = os.path.join(os.path.dirname(
-        __file__), '../output_acceleration.csv')
+        __file__), '../data/output_acceleration.csv')
     data = np.genfromtxt(file_total_path, delimiter=',', skip_header=1)
     # Convert angles from degrees to radians
     thetad = data[:, 0] * math.pi / 180
