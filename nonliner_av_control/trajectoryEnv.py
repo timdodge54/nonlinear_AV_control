@@ -80,7 +80,6 @@ class TrajectoryEnv(gym.Env):
         return self.state, reward, done, {}
 
     def render(self, mode='human'):
-        # render with arrow pointing in the direction of the third state
         pygame.init()
         screen = pygame.display.set_mode((self.window_size, self.window_size))
         screen.fill((255, 255, 255))
@@ -90,7 +89,9 @@ class TrajectoryEnv(gym.Env):
         x = int(x * self.window_size / 2000 + self.window_size / 2)
         y = int(y * self.window_size / 2000 + self.window_size / 2)
         theta = -theta
+        # Convert to degrees for pygame
         theta = int(theta * 180 / np.pi)
+        # render with arrow to indicate the direction
         arrow = pygame.Surface((50, 50), pygame.SRCALPHA)
         pygame.draw.polygon(arrow, (0, 0, 0), ((25, 0), (50, 50), (0, 50)))
         arrow = pygame.transform.rotate(arrow, theta)
