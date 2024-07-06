@@ -108,3 +108,7 @@ class PPO:
             if i % 10 == 0:
                 self.test()
                 self.model.save()
+
+if __name__ == "__main__":
+    ppo = PPO()
+    ppo.train()
