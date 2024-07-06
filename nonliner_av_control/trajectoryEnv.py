@@ -7,8 +7,8 @@ import numpy.typing as npt
 from scipy.integrate import odeint
 
 class TrajectoryEnv(gym.Env):
-    metadata = {'render.modes': ['human', 'rgb_array'], 'render_fps': 4}
-    def __init__(self, dt=.01, render_mode='rgb_array'):
+    metadata = {'render.modes': ['human', ], 'render_fps': 4}
+    def __init__(self, dt=.01):
         super(TrajectoryEnv, self).__init__()
         self.window_size = 512
         self.action_space = spaces.Box(
@@ -98,10 +98,6 @@ class TrajectoryEnv(gym.Env):
         screen.blit(arrow, (x, y))
         pygame.display.flip()
         pygame.time.wait(100)
-        if mode == 'rgb_array':
-            data = pygame.surfarray.array3d(screen)
-            pygame.quit()
-            return data
         return None
 
     def reset(self):
