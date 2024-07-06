@@ -6,7 +6,7 @@ import numpy as np
 from nonlinear_av_control.Model import ActorCritic
 from nonlinear_av_control.utils import np_to_torch, torch_to_np, Writer
 from nonlinear_av_control.trajectoryEnv import TrajectoryEnv as Env
-from nonlinear_AV_control.nonliner_av_control.Train import calc_gae_returns_advantage, store_step
+from itertools import count
 
 
 class Hypers:
@@ -22,9 +22,6 @@ class Hypers:
     steps = 6417
     gae_lambda = 0.95
     
-
-
-
 class TrajectoryData:
     def __init__(self, num_inputs, num_outputs, num_envs, n_steps) -> None:
         self.s = n_steps
@@ -94,6 +91,20 @@ class PPO:
             self.optim.step()
         self.writer.track_training(actor_loss, critic_loss, actuation_loss)
 
-
-
-
+    def test(self):
+        state = self.env.reset()
+        test_reward = 0
+        with torch.no_grad():
+            for _ in range(Hypers.steps):
+                mu_action = self.model.actor(np_to_torch(state))
+                state, reward, _, _ = self.env.step(torch_to_np(mu_action))
+                test_reward += torch.mean(reward)
+        self.writer.track_test(test_reward/Hypers.steps)
+    
+    def train(self):    
+        for i in count(0):
+            self.collect_rollouts()
+            self.update_model()
+            if i % 10 == 0:
+                self.test()
+                self.model.save()
