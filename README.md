@@ -118,7 +118,7 @@ since \( v_{r} \) is time-varying and should converge to \( v_d \) is not zero t
 \dot{V} &= x_e(v_r + \omega_r y_e - v_d\cos(\theta_e)) + y_e(-\omega_r x_e + v_d \sin(\theta_e)) + \theta_e(\omega_r - \omega_d) \\
 &= v_rx_e + \omega_r\theta_e -v_d\cos(\theta_e)x_e + v_d\sin(\theta_e)y_e - \theta_e\omega_d \\
 &\leq v_rx_e + \omega_r\theta_e +v_d(\sin(\theta_e)y_e - x_e) - \theta_e\omega_d \\
-\omega_r &\triangleq \Bar{\omega_r} - \omega_d \\
+\omega_r &\triangleq \bar{\omega_r} - \omega_d \\
 &\leq v_rx_e + \bar{\omega_r}\theta_e +v_d(\sin(\theta_e)y_e - x_e) \\
 v_r &\triangleq  v_d - k_1 x_e \\
 &\leq -k_1x_e^2 + \bar{\omega_r}\theta_e +v_dy_e\sin(\theta_e) \\
@@ -186,7 +186,7 @@ this derivative is continually differentiable and bounded. The characteristic eq
 a_3 s^3 + a_2 s^2 + a_1s + a_0 = 0
 ```
 
-where \( a_3 = 1, \, a_2 = k_3 vr + k_1, \, a_1 = k_2 v_r^2 + k_1 k_3 v_r + \omega_r^2, \, a_0 = k_1 k_2 v_r^2 + \omega_r^2 k_3 v_r \). Since all the coefficients are positive and \( a_1 a_2 - a_0 a_3 > 0 \), the real parts of all roots are negative through the Routh-Hurwitz Criterion. So by Corollary 41 on page 223 in [4], the proposition is true.
+where $ a_3 = 1, \, a_2 = k_3 vr + k_1, \, a_1 = k_2 v_r^2 + k_1 k_3 v_r + \omega_r^2, \, a_0 = k_1 k_2 v_r^2 + \omega_r^2 k_3 v_r $. Since all the coefficients are positive and $ a_1 a_2 - a_0 a_3 > 0 $, the real parts of all roots are negative through the Routh-Hurwitz Criterion. So by Corollary 41 on page 223 in [4], the proposition is true.
 
 ## References
 
