@@ -200,6 +200,96 @@ a_3 = 1, \, a_2 = k_3 vr + k_1, \, a_1 = k_2 v_r^2 + k_1 k_3 v_r + \omega_r^2, \
 
  , the real parts of all roots are negative through the Routh-Hurwitz Criterion. So by Corollary 41 on page 223 in [4], the proposition is true.
 
+## Feedback Linearization Controller
+
+ \cite{linearization} introduces the feedback linearized controller for this formulation of \eqref{eq:error_model}. The Ackerman steering system has something known as non-holonomic constraints which are non-integrable constraints. In this case, the constraint is that it cannot move orthogonal to its current position. Instead of controlling the back wheels which is the original control point the control point is set some distance ahead. This point $(x_g,y_g)$ is positioned $\frac{l}{2}$ distance away from the original control point. It should be noted that because the control point is placed in front of the vehicle the control is only stable when the vehicle has a positive linear velocity. If it is moving backward the control will destabilize. With this point defined the dynamics around this point can be expressed.
+
+```math
+\begin{aligned}
+x_g &= x_r + \frac{l}{2}\cos(\theta_r) \\
+y_g &= y_r + \frac{l}{2}\sin(\theta_r) \\
+\dot{x_g} &= v\cos (\theta_r)-\dot{\theta_r}\frac{l}{2}\sin(\theta_r) \\
+\dot{y_g} &= v\sin(\theta_r)+\dot{\theta_r}\frac{l}{2}\cos(\theta_r)
+\end{aligned}
+```
+
+```math
+\begin{bmatrix}
+\dot{x}_{g} \\
+\dot{y}_{g}
+\end{bmatrix} = \begin{bmatrix}
+\cos(\theta_r) & -\frac{L}{2}\sin(\theta_r) \\
+\sin(\theta_r) & \frac{L}{2}\cos(\theta_r)
+\end{bmatrix}\begin{bmatrix}
+v_r \\
+\dot{\theta}
+\end{bmatrix} = A\left[\begin{array}{l}
+v \\
+\dot{\theta}
+\end{array}\right]
+```
+
+With this expression of the dynamics, the control can be solved by left multiplying \eqref{eq:feedback_dyn} by the inverse of A.
+
+\begin{equation}
+\label{eq:control_lin_1}
+\begin{bmatrix}
+v_r \\
+\dot{\theta_r}
+\end{bmatrix} = \begin{bmatrix}
+\cos(\theta_r) & \sin(\theta_r) \\
+-\frac{2}{L}\sin(\theta_r) & \frac{2}{L}\cos(\theta_r)
+\end{bmatrix}\begin{bmatrix}
+\dot{x}_g \\
+\dot{y}_g
+\end{bmatrix}
+\end{equation}
+
+The point, $(x_g, y_g)$, can be express its position relative to the desired point, $(x_d, y_d)$, instead of the current vehicle coordinates, $(x_r, y_r)$. This results in the error dynamics defined as the following.
+
+```math
+\begin{aligned}
+\dot{x}_e &= \dot{x}_d + k_1 x_e \\
+\dot{y}_e &= \dot{y}_d + k_2 y_e \\
+x_e &= x_d - x_g \\
+y_e &= y_d - y_g
+\end{aligned}
+```
+
+Substituting \eqref{eq:xg} and \eqref{eq:yg} into \eqref{eq:control_lin_1} yields the following
+
+\begin{equation}
+\begin{bmatrix}
+v_r \\
+\dot{\theta_r}
+\end{bmatrix} = \begin{bmatrix}
+\cos(\theta_r) & \sin(\theta_r) \\
+-\frac{2}{l}\sin(\theta_r) & \frac{2}{l}\cos(\theta_r)
+\end{bmatrix}\begin{bmatrix}
+\dot{x}_d + k_1 x_e \\
+\dot{y}_d + k_2 y_e
+\end{bmatrix}
+\end{equation}
+
+where \( k_1 \) and \( k_2 \) are the control gains. With the control defined stability must be verified. Substituting \eqref{eq:xg} and \eqref{eq:yg} into \eqref{eq:x_e} and \eqref{eq:y_e} results in
+
+```math
+\left[\begin{array}{l} \dot{x}_{e}\\\dot{y}_{e} \end{array}\right]+\left[\begin{array}{ll} k_{1} & 0\\0 & k_{2} \end{array}\right]\left[\begin{array}{l} x_{e}\\y_{e} \end{array}\right]=0
+```
+
+implies that the derivative of, \( e = \begin{bmatrix}
+x_e\\y_e
+\end{bmatrix} \), is equal to itself times the negative control gains. Defining the candidate Lyapunov function to be \( V=.5e^Te \) the derivative can be taken.
+
+```math
+\begin{equation}
+\label{eq:error_lyap}
+\dot{V} = e^T\dot{e} = k_1x_e^2-k_2x_e^2 < 0
+\end{equation}
+```
+
+\eqref{eq:error_lyap} is negative definite ensuring that the error will converge to zero.
+
 ## References
 
 1. Alcalá, E., Sellart, L., Puig, V., Quevedo, J., Saludes, J., Vázquez, D., & López, A. (2016). Comparison of two non-linear model-based control strategies for autonomous vehicles. In _2016 24th Mediterranean Conference on Control and Automation (MED)_ (pp. 846-851). IEEE. <https://doi.org/10.1109/MED.2016.7535921>
