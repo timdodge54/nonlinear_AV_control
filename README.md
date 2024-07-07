@@ -186,7 +186,8 @@ this derivative is continually differentiable and bounded. The characteristic eq
 a_3 s^3 + a_2 s^2 + a_1s + a_0 = 0
 ```
 
-where $ a_3 = 1, \, a_2 = k_3 vr + k_1, \, a_1 = k_2 v_r^2 + k_1 k_3 v_r + \omega_r^2, \, a_0 = k_1 k_2 v_r^2 + \omega_r^2 k_3 v_r $. Since all the coefficients are positive and $ a_1 a_2 - a_0 a_3 > 0 $, the real parts of all roots are negative through the Routh-Hurwitz Criterion. So by Corollary 41 on page 223 in [4], the proposition is true.
+where ```math
+a_3 = 1, \, a_2 = k_3 vr + k_1, \, a_1 = k_2 v_r^2 + k_1 k_3 v_r + \omega_r^2, \, a_0 = k_1 k_2 v_r^2 + \omega_r^2 k_3 v_r```. Since all the coefficients are positive and ```math a_1 a_2 - a_0 a_3 > 0```, the real parts of all roots are negative through the Routh-Hurwitz Criterion. So by Corollary 41 on page 223 in [4], the proposition is true.
 
 ## References
 
