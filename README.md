@@ -4,6 +4,18 @@
 
 Autonomous driving has gained significant popularity in recent years. This trend has underscored the need for comprehensive control methods. In this project, I will be comparing and contrasting several nonlinear control for an autonomous vehicle to track time-varying trajectories. The control techniques I will be comparing are of two varieties of controllers traditional nonlinear controllers and reinforcement learing based controllers.
 
+## Installation
+
+To run this project, you will need to have Python 3.10 or later installed on your machine.
+
+To install all project dependencies and the project itself, run the following commands:
+
+```bash
+git clone https://github.com/timdodge54/nonlinear_AV_control.git
+cd nonlinear_AV_control
+pip install -e .
+```
+
 ## Dynamics of the Vehicle
 
 For the purposes of this project, the dynamics of the vehicle are modeled as a simple kinematic bicycle model. The state of the vehicle is defined as follows:
