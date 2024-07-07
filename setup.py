@@ -12,7 +12,7 @@ if os.path.isfile(requirementPath):
         install_requires = f.read().splitlines()
 
 setup(
-    name="nonliner_av_control",
+    name="nonlinear_av_control",
     # install_requires=install_requires,
     packages=find_packages(),
 )
