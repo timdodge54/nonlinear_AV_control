@@ -13,6 +13,7 @@ if os.path.isfile(requirementPath):
 
 setup(
     name="nonlinear_av_control",
-    # install_requires=install_requires,
+    license="MIT",
+    install_requires=install_requires,
     packages=find_packages(),
 )
