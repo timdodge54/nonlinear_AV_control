@@ -102,12 +102,21 @@ class Env():
         # this is not needed for the norm but i wanna and you cant stop me :P
         thetadiff: np.float64 = thetar - theta
         thetadiff = np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
-        vec_diff = np.array([xr - x, yr - y, thetar - theta])
+        vec_diff = np.array([xr - x, yr - y, thetadiff])
         self.distance_to_waypoint.append(np.linalg.norm(np.mean(vec_diff[0:2], axis=1), axis=0))
         vec_diff_mean = np.mean(vec_diff, axis=1)
         # reward function
         reward = np_to_torch(np.array([-np.linalg.norm(vec_diff_mean)])) / 50
-        if np.linalg.norm(vec_diff_mean) < 1e-4:
+        mean_x = np.abs(vec_diff_mean.item(0))
+        mean_y = np.abs(vec_diff_mean.item(1))
+        mean_theta = np.abs(vec_diff_mean.item(2))
+        if mean_x < 1e-3:
+            reward += .33 
+        if mean_y < 1e-3:
+            reward += .33
+        if mean_theta < 1e-3:
+            reward += .33
+        if mean_x < 1e-3 and mean_y < 1e-3 and mean_theta < 1e-3:
             reward += 1
         v = action[:,0]
         phi = action[:, 1]
