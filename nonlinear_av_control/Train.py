@@ -102,6 +102,7 @@ class PPO:
         self.writer = Writer(f"ppo_{Hypers.n_envs}_{Hypers.learning_rate}_{Hypers.std_dev}")
 
     def collect_rollouts(self):
+        """Perform the rollouts for the PPO algorithm."""
         state = np_to_torch(self.env.reset())
         with torch.no_grad():
             for i in range(Hypers.steps):
@@ -118,6 +119,7 @@ class PPO:
         self.traj_data.calc_gae_returns_advantage()
 
     def update_model(self):
+        """Update the model using the PPO algorithm."""
         actor_losses, critic_losses, actuation_losses = [], [], []
 
         for _ in range(Hypers.ppo_epochs):
@@ -161,6 +163,7 @@ class PPO:
         )
 
     def test(self):
+        """Test the model."""
         state = self.env.reset()
         test_reward = 0
         with torch.no_grad():
@@ -171,6 +174,7 @@ class PPO:
         self.writer.track_test(test_reward/Hypers.steps)
     
     def train(self):    
+        """Train the model."""
         print("Training")
         for i in count(0):
             self.collect_rollouts()

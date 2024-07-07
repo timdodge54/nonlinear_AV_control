@@ -5,7 +5,42 @@ from nonlinear_av_control.Utils import np_to_torch
 import matplotlib.pyplot as plt
 
 class Env():
+    """Class that houses an eviroment for having a bike follow a trajectory.
+    
+    Attributes:
+        n (int): The number of instances of the environment.
+        window_size (int): The size of the window for the plot.
+        agent_state (npt.ArrayLike): The state of the agent.
+        n_in_out (tuple): The number of inputs and outputs for the model.
+        wheelbase (float): The wheelbase of the bike.
+        max_timesteps (int): The maximum number of timesteps.
+        thetad (npt.ArrayLike): The series of desired angle for each waypoint.
+        yd (npt.ArrayLike): The desired y position for each waypoint.
+        xd (npt.ArrayLike): The desired x position for each waypoint.
+        vd (npt.ArrayLike): The desired velocity for each waypoint.
+        omega_d (npt.ArrayLike): The desired angular velocity for each waypoint.
+        t_vec (npt.ArrayLike): The time vector for the waypoints.
+        ang_acc_d (npt.ArrayLike): The desired angular acceleration for each waypoint.
+        dt (float): The time step.
+        t (float): The current time.
+        x_y_history (npt.ArrayLike): The history of the x and y positions of the agent.
+        state (npt.ArrayLike): The state of the agent.
+        distance_to_waypoint (npt.ArrayLike): The distance to the waypoint.
+        fig (matplotlib.figure.Figure): The figure for the plot.
+        ax (matplotlib.axes.Axes): The axes for the plot.
+        pygame_init (bool): Whether pygame is initialized.
+        space_range (int): The range of the space.
+        draw_traj (bool): Whether the trajectory is drawn.
+    """
     def __init__(self, n, dt=.01, max_timesteps=1000) -> None:
+        """Initialize.
+        
+        Args:
+            n (int): The number of instances of the environment.
+            dt (float, optional): The time step. Defaults to .01.
+            max_timesteps (int, optional): The maximum number of timesteps. 
+                Defaults to 1000.
+            """
         self.n = n
         self.window_size = 1000
         self.agent_state = np.zeros((n, 3), dtype=np.float32)
@@ -44,6 +79,17 @@ class Env():
 
 
     def step(self, action):
+        """Perform a step in the environment.
+        
+        Args:
+            action (npt.ArrayLike): The action to take.
+            
+        Returns:
+            npt.ArrayLike: The state.
+            npt.ArrayLike: The reward.
+            bool: Whether the episode is done.
+            dict: The info.
+        """
         index = int(np.floor(self.t*(1/self.dt)) + 1)
         # Gather the desired values for the next waypoint
         thetar = self.thetad[index]
@@ -80,10 +126,8 @@ class Env():
             done = True
         return self.state, reward, done, {}
 
-    def get_state(self):
-        return self.state
-
     def render(self):
+        """Render the environment."""
         self.ax.set_xlim(0, self.window_size)
         self.ax.set_ylim(0, self.window_size)
         
@@ -91,27 +135,27 @@ class Env():
         # Draw the trajectory
         if not self.draw_traj:
             self.draw_traj = True
-        self.draw_trajectory()
+        self._draw_trajectory()
 
         # Draw current position and orientation of the agent
-        self.draw_agent()
+        self._draw_agent()
 
         plt.pause(0.001)
 
-    def draw_trajectory(self):
+    def _draw_trajectory(self):
         len_desired = len(self.xd)
         for i in range(len_desired - 1):
             x1, y1 = self._transform_coordinates(self.xd[i], self.yd[i])
             x2, y2 = self._transform_coordinates(self.xd[i + 1], self.yd[i + 1])
             self.ax.plot([x1, x2], [y1, y2], 'k-')
 
-    def draw_agent(self):
+    def _draw_agent(self):
         x, y, theta = self.state.item(0), self.state.item(1), self.state.item(2)
         x, y = self._transform_coordinates(x, y)
         triangle = [
-            (x + 2 * np.cos(theta), y + 2 * np.sin(theta)),
-            (x + 2 * np.cos(theta - 2 * np.pi / 3), y + 2 * np.sin(theta - 2 * np.pi / 3)),
-            (x + 2 * np.cos(theta + 2 * np.pi / 3), y + 2 * np.sin(theta + 2 * np.pi / 3))
+            (x + 1 * np.cos(theta), y + 1 * np.sin(theta)),
+            (x + 1 * np.cos(theta - 2 * np.pi / 3), y + 1 * np.sin(theta - 2 * np.pi / 3)),
+            (x + 1 * np.cos(theta + 2 * np.pi / 3), y + 1 * np.sin(theta + 2 * np.pi / 3))
         ]
         polygon = plt.Polygon(triangle, color='black')
         self.ax.add_patch(polygon)
@@ -123,6 +167,7 @@ class Env():
 
 
     def reset(self):
+        """Reset the environment."""
         state = np.array([self.xd[0], self.yd[0], self.thetad[0]], dtype=np.float32)
         self.t = 0.
         self.state = np.repeat(state[np.newaxis, :], self.n, axis=0)
