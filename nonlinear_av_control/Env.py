@@ -61,6 +61,8 @@ class Env():
         vec_diff_mean = np.mean(vec_diff, axis=1)
         # reward function
         reward = np_to_torch(np.array([-np.linalg.norm(vec_diff_mean)])) / 50
+        if np.linalg.norm(vec_diff_mean) < 1e-4:
+            reward += 1
         v = action[:,0]
         phi = action[:, 1]
         # Update the state
