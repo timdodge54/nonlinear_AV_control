@@ -290,6 +290,58 @@ x_e\\y_e
 
 \eqref{eq:error_lyap} is negative definite ensuring that the error will converge to zero.
 
+## Reinforcement Learning Controller
+
+Reinforcement learning is a type of machine learning that is used to train an agent to make decisions in an environment. The agent learns by interacting with the environment and receiving rewards or penalties for its actions. In this project, I will be using reinforcement learning to train an agent to control an autonomous vehicle to follow a time-varying trajectory. For this project the most popular reinforcement learning algorithm, Proximal Polixy Optimization (PPO) was chosen.
+
+### PPO Algorithm
+
+Proximal Policy Optimization (PPO) is a policy gradient method that is used to train agents in reinforcement learning. PPO is an on-policy algorithm, which means that it learns from the data that it collects during training. PPO is designed to be more stable and sample-efficient than other policy gradient methods, such as REINFORCE or TRPO. PPO works by optimizing a surrogate objective function that is a lower bound on the expected return of the policy. The surrogate objective function is optimized using stochastic gradient descent.
+
+The PPO algorithm has two main components: the policy network and the value network. The policy network is a neural network that takes the state of the environment as input and outputs a probability distribution over the actions that the agent can take. The value network is a neural network that takes the state of the environment as input and outputs an estimate of the expected return of the policy. The policy network is trained to maximize the expected return of the policy, while the value network is trained to minimize the error in the estimated return.
+
+The loss function for the policy network is defined as the following:
+
+```math
+L^{CLIP}(\theta) = \hat{\mathbb{E}}_t \left[ \min \left( r_t(\theta) \hat{A}_t, \text{clip}(r_t(\theta), 1 - \epsilon, 1 + \epsilon) \hat{A}_t \right) \right]
+```
+
+where \( r_t(\theta) \) is the ratio of the probability of the action taken under the new policy to the probability of the action taken under the old policy, \( \hat{A}_t \) is the advantage function, and \( \epsilon \) is a hyperparameter that controls the size of the policy update. The loss function for the value network is defined as the following:
+
+```math
+L^{VF}(\theta) = \hat{\mathbb{E}}_t \left[ \left( V_{\theta}(s_t) - V_t \right)^2 \right]
+```
+
+Value estimatino is done with the generalized advantage estimation (GAE) algorithm. The GAE algorithm is used to estimate the advantage function, which is a measure of how much better an action is than the average action. The advantage function is used to update the policy network and the value network. This function is defined as the following:
+
+```math
+\hat{A}_t = \delta_t + (\gamma \lambda) \delta_{t+1} + (\gamma \lambda)^2 \delta_{t+2} + \ldots + (\gamma \lambda)^{T-t+1} \delta_{T-1}
+```
+
+where \( \delta_t = r_t + \gamma V_{\theta}(s_{t+1}) - V_{\theta}(s_t) \) is the TD error, \( \gamma \) is the discount factor, \( \lambda \) is the GAE parameter, and \( T \) is the length of the trajectory.
+
+The third loss function leveraged is an actuator loss function. This function attemtps to minimize the mean output of the actuator. This is to discourage the agent from making large steering angle changes and velocity changes.
+
+```math
+L^{ACT}(\theta) = \frac{1}{N} \sum_{i=1}^{N} \max((\mu_{\text{action}, i}^2 - 1), 0)
+```
+
+The final loss function is the sum of the policy loss, the value loss, and the actuator loss.
+
+```math
+L(\theta) = L^{CLIP}(\theta) + L^{VF}(\theta) + L^{ACT}(\theta)
+```
+
+### Reward Function
+
+The reward function that is used to train the agent is defined as the following:
+
+```python
+reward_disctance = -norm([x_r, y_r, \theta_r] - [x_d, y_d, \theta_d])
+reward_close = 1 if norm([x_r, y_r, \theta_r] - [x_d, y_d, \theta_d]) < 1e-5 else 0
+reward = reward_distance + reward_close
+```
+
 ## References
 
 1. Alcalá, E., Sellart, L., Puig, V., Quevedo, J., Saludes, J., Vázquez, D., & López, A. (2016). Comparison of two non-linear model-based control strategies for autonomous vehicles. In _2016 24th Mediterranean Conference on Control and Automation (MED)_ (pp. 846-851). IEEE. <https://doi.org/10.1109/MED.2016.7535921>
