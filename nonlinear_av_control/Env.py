@@ -67,8 +67,13 @@ class Env():
         self.x_y_history = np.zeros((n, 2, max_timesteps), dtype=np.float32)
         # set the inital state to the first waypoint with n number of instances
         state = np.array([self.xd[0], self.yd[0], self.thetad[0]], dtype=np.float32)
+        # draw initial state from random uniform distribution with the shape 
+        # (n, 3) with bounds -100, 100, -100, 100, -pi, pi
+        state = np.random.uniform(-100, 100, (n, 3))
+        state[:, 2] = np.random.uniform(-np.pi, np.pi, n)
+        self.state = state
         # repeat this so that you have n number of instances
-        self.state = np.repeat(state[np.newaxis, :], n, axis=0)
+        # self.state = np.repeat(state[np.newaxis, :], n, axis=0)
         self.distance_to_waypoint = []
         self.fig, self.ax = plt.subplots()
         self.ax.set_xlim(0, self.window_size)
@@ -91,6 +96,7 @@ class Env():
             dict: The info.
         """
         index = int(np.floor(self.t*(1/self.dt)) + 1)
+        index = 1400
         # Gather the desired values for the next waypoint
         thetar = self.thetad[index]
         xr = self.xd[index]
@@ -99,24 +105,23 @@ class Env():
         x = self.state[:, 0]
         y = self.state[:, 1]
         theta = self.state[:, 2]
-        # this is not needed for the norm but i wanna and you cant stop me :P
         thetadiff: np.float64 = thetar - theta
         thetadiff = np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
         vec_diff = np.array([xr - x, yr - y, thetadiff])
-        self.distance_to_waypoint.append(np.linalg.norm(np.mean(vec_diff[0:2], axis=1), axis=0))
         vec_diff_mean = np.mean(vec_diff, axis=1)
         # reward function
-        reward = np_to_torch(np.array([-np.linalg.norm(vec_diff_mean)])) / 50
+        reward = np_to_torch(np.array([-np.linalg.norm(vec_diff_mean)])) / 10
         mean_x = np.abs(vec_diff_mean.item(0))
         mean_y = np.abs(vec_diff_mean.item(1))
         mean_theta = np.abs(vec_diff_mean.item(2))
-        if mean_x < 1e-3:
+        lim = 1e-1
+        if mean_x < lim:
             reward += .33 
-        if mean_y < 1e-3:
+        if mean_y < lim:
             reward += .33
-        if mean_theta < 1e-3:
+        if mean_theta < lim:
             reward += .33
-        if mean_x < 1e-3 and mean_y < 1e-3 and mean_theta < 1e-3:
+        if mean_x < lim and mean_y < lim and mean_theta < lim:
             reward += 1
         v = action[:,0]
         phi = action[:, 1]
@@ -126,13 +131,20 @@ class Env():
         # euler integration
         new_state = self.state + self.dt * dvdt
         new_theta = new_state[:, 2]
-        new_theta = np.arctan(np.sin(new_theta) / np.cos(new_theta))
+        # wrap the angle and use try except to catch the divide by zero error
+        try:
+            new_theta = np.arctan(np.sin(new_theta) / np.cos(new_theta))
+        except:
+            print("invalid value for theta")
+            print(new_theta)
+            raise
         new_state[:, 2] = new_theta
         self.state = new_state
         self.t += self.dt
         done = False
-        if self.t > self.max_timesteps*self.dt:
+        if self.t >= self.max_timesteps*self.dt - .01:
             done = True
+            self.distance_to_waypoint.append(np.linalg.norm(np.mean(vec_diff[0:2], axis=1), axis=0))
         return self.state, reward, done, {}
 
     def render(self):
@@ -149,7 +161,6 @@ class Env():
         # Draw current position and orientation of the agent
         self._draw_agent()
 
-        plt.pause(0.001)
 
     def _draw_trajectory(self):
         len_desired = len(self.xd)
@@ -166,20 +177,20 @@ class Env():
             (x + 1 * np.cos(theta - 2 * np.pi / 3), y + 1 * np.sin(theta - 2 * np.pi / 3)),
             (x + 1 * np.cos(theta + 2 * np.pi / 3), y + 1 * np.sin(theta + 2 * np.pi / 3))
         ]
-        polygon = plt.Polygon(triangle, color='black')
+        polygon = plt.Polygon(triangle, color='red')
         self.ax.add_patch(polygon)
 
     def _transform_coordinates(self, x, y):
-        screen_x = (x + self.space_range) * self.window_size / (2 * self.space_range)
-        screen_y = (y + self.space_range) * self.window_size / (2 * self.space_range)
-        return screen_x, screen_y    
+        return x, y
 
 
     def reset(self):
         """Reset the environment."""
-        state = np.array([self.xd[0], self.yd[0], self.thetad[0]], dtype=np.float32)
+        state = np.random.uniform(-100, 100, (self.n, 3))
+        state[:, 2] = np.random.uniform(-np.pi, np.pi, self.n)
+        self.state = state
         self.t = 0.
-        self.state = np.repeat(state[np.newaxis, :], self.n, axis=0)
+        # self.state = np.repeat(state[np.newaxis, :], self.n, axis=0)
         self.distance_to_waypoint = []
         return self.state
 

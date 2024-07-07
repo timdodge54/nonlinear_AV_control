@@ -125,7 +125,7 @@ class PPO:
         for _ in range(Hypers.ppo_epochs):
 
             # Compute values and critic loss
-            values = torch.mean(self.model.critic(self.traj_data.states), axis=-1, keepdim=True)
+            values = self.model.critic(self.traj_data.states)
             critic_loss = ((self.traj_data.returns.clone().detach() - values).pow(2)).mean()
 
             # Compute mu_action and log_probs
