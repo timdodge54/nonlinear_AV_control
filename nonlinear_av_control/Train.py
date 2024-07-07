@@ -23,7 +23,29 @@ class Hypers:
     gae_lambda = 0.95
     
 class TrajectoryData:
+    """The data class that holds the trajectory data for the PPO algorithm.
+    
+    Attributes:
+        s: The number of steps in the trajectory.
+        states: The states of the environment.
+        values: The value estimates of the states.
+        actions: The actions taken.
+        log_probs: The log probabilities of the actions.
+        rewards: The rewards received.
+        masks: The masks for the done states.
+        returns: The returns for the states.
+        advantages: The advantages of the states.
+        as_dict: The dictionary representation of the class.
+    """
     def __init__(self, num_inputs, num_outputs, num_envs, n_steps) -> None:
+        """Initialize.
+        
+        Args:
+            num_inputs (int): The number of inputs to the model.
+            num_outputs (int): The number of outputs from the model.
+            num_envs (int): The number of environments.
+            n_steps (int): The number of steps in the trajectory.
+        """
         self.s = n_steps
         i, o, n, s = num_inputs, num_outputs, num_envs, n_steps
         torch.set_default_device('cuda')
@@ -32,16 +54,24 @@ class TrajectoryData:
         self.actions = torch.zeros((n, s, o))
         self.log_probs = torch.zeros((n, s, o))
         self.rewards = torch.zeros((n, s, 1 ))
-        self.masks = torch.ones((n, s, 1 ))
+        self.masks = torch.zeros((n, s, 1 ))
         self.returns = torch.zeros((n, s, 1 ))
         self.advantages = torch.zeros((n, s, 1))
         self.as_dict = vars(self)
 
     def store_step(self, i, keys = ["log_probs", "states", "actions", "rewards", "masks", "values"], vals = None):
+        """Store the step data in the class.
+
+        Args:
+            i (int): The index of the step.
+            keys (list[str]): The keys for the data.
+            vals [list[list[float]]]: The values for the data. 
+        """
         for key, val in zip(keys, vals):
             self.as_dict[key][:, i, :] = val
 
     def calc_gae_returns_advantage(self):
+        """Calculate the GAE, returns, and advantages for the trajectory."""
         gae = torch.zeros(Hypers.n_envs, 1).to('cuda')
         for i in range(Hypers.steps -1, 0, -1):
             delta = (
@@ -53,7 +83,17 @@ class TrajectoryData:
         self.advantages = (advantage - advantage.mean()) / (advantage.std() + 1e-8)
 
 class PPO:
+    """The Proximal Policy Optimization algorithm.
+    
+    Attributes:
+        env (Env): The environment.
+        model (ActorCritic): The model.
+        optim (torch.optim.Adam): The optimizer.
+        traj_data (TrajectoryData): The trajectory data.
+        writer (Writer): The writer.
+    """
     def __init__(self):
+        """Initiallize."""
         self.env = Env(Hypers.n_envs, Hypers.dt, Hypers.steps) 
         num_inputs, num_outputs = self.env.n_in_out
         self.model = ActorCritic(num_inputs, num_outputs).to('cuda')
