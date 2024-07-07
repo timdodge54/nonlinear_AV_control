@@ -342,6 +342,18 @@ reward_close = 1 if norm([x_r, y_r, \theta_r] - [x_d, y_d, \theta_d]) < 1e-5 els
 reward = reward_distance + reward_close
 ```
 
+## Trajectory Generation
+
+## Trajectory Generation
+
+For these controllers to operate properly, followable trajectories must be generated so that the vehicle has something to follow. To generate these trajectories, the application Driving Scenario Designer \cite{MATLAB} from Matlab's Automated Driving toolbox was utilized.
+
+The driving scenario designer is a cuboid simulation that only allows the choice of two vehicle classes: sedan and truck. It does allow the user to specify the vehicle's wheelbase, which is the only essential dimensional parameter needed for the controller.
+
+![Example Sim Path](figures/sim.png)
+
+Figure \ref{fig:sim} shows an example simulation that can be generated. To develop a trajectory, the process begins with constructing a road, followed by the creation of a vehicle equipped with an INS sensor. This sensor is essential, as the simulation records the true state of the vehicle's position, velocity, yaw, and angular velocity. If a sensor is not defined, the system will not record anything. Waypoints can then be placed along the road to create the trajectory. Throughout the simulations, the vehicle's velocity is maintained at a constant rate to simplify the computation of the necessary steering angle. The simulation captures data at a frequency of 100 Hz. Subsequently, the data is exported to a CSV file, facilitating platform-independent parsing, as both the controllers and the simulation are implemented in Python.
+
 ## References
 
 1. Alcalá, E., Sellart, L., Puig, V., Quevedo, J., Saludes, J., Vázquez, D., & López, A. (2016). Comparison of two non-linear model-based control strategies for autonomous vehicles. In _2016 24th Mediterranean Conference on Control and Automation (MED)_ (pp. 846-851). IEEE. <https://doi.org/10.1109/MED.2016.7535921>
