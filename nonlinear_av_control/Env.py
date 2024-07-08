@@ -4,9 +4,10 @@ import numpy.typing as npt
 from nonlinear_av_control.Utils import np_to_torch
 import matplotlib.pyplot as plt
 
-class Env():
+
+class Env:
     """Class that houses an eviroment for having a bike follow a trajectory.
-    
+
     Attributes:
         n (int): The number of instances of the environment.
         window_size (int): The size of the window for the plot.
@@ -32,25 +33,24 @@ class Env():
         space_range (int): The range of the space.
         draw_traj (bool): Whether the trajectory is drawn.
     """
-    def __init__(self, n, dt=.01, max_timesteps=1000) -> None:
+
+    def __init__(self, n, dt=0.01, max_timesteps=1000) -> None:
         """Initialize.
-        
+
         Args:
             n (int): The number of instances of the environment.
             dt (float, optional): The time step. Defaults to .01.
-            max_timesteps (int, optional): The maximum number of timesteps. 
+            max_timesteps (int, optional): The maximum number of timesteps.
                 Defaults to 1000.
-            """
+        """
         self.n = n
         self.window_size = 1000
         self.agent_state = np.zeros((n, 3), dtype=np.float32)
-        self.n_in_out =  3, 2
-        file_total_path = os.path.join(os.path.dirname(
-        __file__), '../data/output_acceleration.csv')
-        data = np.genfromtxt(
-            file_total_path,
-            delimiter=',',
-            skip_header=1)
+        self.n_in_out = 3, 2
+        file_total_path = os.path.join(
+            os.path.dirname(__file__), "../data/output_acceleration.csv"
+        )
+        data = np.genfromtxt(file_total_path, delimiter=",", skip_header=1)
         # Convert angles from degrees to radians
         self.thetad = data[:, 0] * np.pi / 180
         # x and y are swapped because of the sign convention of theta and theta_dot
@@ -63,11 +63,11 @@ class Env():
         self.t_vec = data[:, 5]
         self.ang_acc_d = data[:, 6]
         self.dt = dt
-        self.t = 0.
+        self.t = 0.0
         self.x_y_history = np.zeros((n, 2, max_timesteps), dtype=np.float32)
         # set the inital state to the first waypoint with n number of instances
         state = np.array([self.xd[0], self.yd[0], self.thetad[0]], dtype=np.float32)
-        # draw initial state from random uniform distribution with the shape 
+        # draw initial state from random uniform distribution with the shape
         # (n, 3) with bounds -100, 100, -100, 100, -pi, pi
         state = np.random.uniform(-100, 100, (n, 3))
         state[:, 2] = np.random.uniform(-np.pi, np.pi, n)
@@ -82,20 +82,19 @@ class Env():
         self.space_range = 1000
         self.draw_traj = False
 
-
     def step(self, action):
         """Perform a step in the environment.
-        
+
         Args:
             action (npt.ArrayLike): The action to take.
-            
+
         Returns:
             npt.ArrayLike: The state.
             npt.ArrayLike: The reward.
             bool: Whether the episode is done.
             dict: The info.
         """
-        index = int(np.floor(self.t*(1/self.dt)) + 1)
+        index = int(np.floor(self.t * (1 / self.dt)) + 1)
         index = 1400
         # Gather the desired values for the next waypoint
         thetar = self.thetad[index]
@@ -105,28 +104,17 @@ class Env():
         x = self.state[:, 0]
         y = self.state[:, 1]
         theta = self.state[:, 2]
-        thetadiff: np.float64 = thetar - theta
+        thetadiff = thetar - theta
         thetadiff = np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
         vec_diff = np.array([xr - x, yr - y, thetadiff])
-        vec_diff_mean = np.mean(vec_diff, axis=1)
         # reward function
-        reward = np_to_torch(np.array([-np.linalg.norm(vec_diff_mean)])) / 10
-        mean_x = np.abs(vec_diff_mean.item(0))
-        mean_y = np.abs(vec_diff_mean.item(1))
-        mean_theta = np.abs(vec_diff_mean.item(2))
-        lim = 1e-1
-        if mean_x < lim:
-            reward += .33 
-        if mean_y < lim:
-            reward += .33
-        if mean_theta < lim:
-            reward += .33
-        if mean_x < lim and mean_y < lim and mean_theta < lim:
-            reward += 1
-        v = action[:,0]
+        reward = np_to_torch(np.array([-np.linalg.norm(vec_diff)])) / 10
+        v = action[:, 0]
         phi = action[:, 1]
         # Update the state
-        dvdt = np.array([v*np.cos(theta), v*np.sin(theta), v*np.tan(phi)/self.wheelbase])
+        dvdt = np.array(
+            [v * np.cos(theta), v * np.sin(theta), v * np.tan(phi) / self.wheelbase]
+        )
         dvdt = np.transpose(dvdt)
         # euler integration
         new_state = self.state + self.dt * dvdt
@@ -142,16 +130,18 @@ class Env():
         self.state = new_state
         self.t += self.dt
         done = False
-        if self.t >= self.max_timesteps*self.dt - .01:
+        if self.t >= self.max_timesteps * self.dt - 0.01:
             done = True
-            self.distance_to_waypoint.append(np.linalg.norm(np.mean(vec_diff[0:2], axis=1), axis=0))
+            self.distance_to_waypoint.append(
+                np.linalg.norm(np.mean(vec_diff[0:2], axis=1), axis=0)
+            )
         return self.state, reward, done, {}
 
     def render(self):
         """Render the environment."""
         self.ax.set_xlim(0, self.window_size)
         self.ax.set_ylim(0, self.window_size)
-        
+
         self.ax.clear()
         # Draw the trajectory
         if not self.draw_traj:
@@ -161,37 +151,39 @@ class Env():
         # Draw current position and orientation of the agent
         self._draw_agent()
 
-
     def _draw_trajectory(self):
         len_desired = len(self.xd)
         for i in range(len_desired - 1):
             x1, y1 = self._transform_coordinates(self.xd[i], self.yd[i])
             x2, y2 = self._transform_coordinates(self.xd[i + 1], self.yd[i + 1])
-            self.ax.plot([x1, x2], [y1, y2], 'k-')
+            self.ax.plot([x1, x2], [y1, y2], "k-")
 
     def _draw_agent(self):
         x, y, theta = self.state.item(0), self.state.item(1), self.state.item(2)
         x, y = self._transform_coordinates(x, y)
         triangle = [
             (x + 1 * np.cos(theta), y + 1 * np.sin(theta)),
-            (x + 1 * np.cos(theta - 2 * np.pi / 3), y + 1 * np.sin(theta - 2 * np.pi / 3)),
-            (x + 1 * np.cos(theta + 2 * np.pi / 3), y + 1 * np.sin(theta + 2 * np.pi / 3))
+            (
+                x + 1 * np.cos(theta - 2 * np.pi / 3),
+                y + 1 * np.sin(theta - 2 * np.pi / 3),
+            ),
+            (
+                x + 1 * np.cos(theta + 2 * np.pi / 3),
+                y + 1 * np.sin(theta + 2 * np.pi / 3),
+            ),
         ]
-        polygon = plt.Polygon(triangle, color='red')
+        polygon = plt.Polygon(triangle, color="red")
         self.ax.add_patch(polygon)
 
     def _transform_coordinates(self, x, y):
         return x, y
-
 
     def reset(self):
         """Reset the environment."""
         state = np.random.uniform(-100, 100, (self.n, 3))
         state[:, 2] = np.random.uniform(-np.pi, np.pi, self.n)
         self.state = state
-        self.t = 0.
+        self.t = 0.0
         # self.state = np.repeat(state[np.newaxis, :], self.n, axis=0)
         self.distance_to_waypoint = []
         return self.state
-
-        

@@ -11,8 +11,6 @@ filelock==3.14.0
 fonttools==4.53.1
 fsspec==2024.5.0
 grpcio==1.64.1
-gym==0.26.2
-gym-notices==0.0.8
 intel-openmp==2021.4.0
 ipython==8.26.0
 jedi==0.19.1
