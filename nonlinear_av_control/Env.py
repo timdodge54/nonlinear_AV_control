@@ -59,7 +59,13 @@ class BikeModelEnv:
         if_not_at_waypoint = x_y_norm > 1
         reward[if_not_at_waypoint] -= x_y_norm[if_not_at_waypoint] / 50
         diff_vec = np.array([xd, yd, thetad]) - self.state
-        diff_vec[:, 2] = np.arctan2(np.sin(diff_vec[:, 2]), np.cos(diff_vec[:, 2])) 
+        diff_vec[:, 2] = np.arctan2(np.sin(diff_vec[:, 2]), np.cos(diff_vec[:, 2]))
+        norm = np.linalg.norm(diff_vec, axis=1)
+        if_at_waypoint_and_pointing = norm < 0.01
+        not_quite_wp = np.logical_and(norm > 0.01, ~if_not_at_waypoint)
+        reward[if_at_waypoint_and_pointing] += 10
+        reward[not_quite_wp] -= norm[not_quite_wp] / (50 * 2 * np.pi)
+        done = np.logical_or(
             np.abs(self.state[:, 0]) > self.space_size,
             np.abs(self.state[:, 1]) > self.space_size,
         )
