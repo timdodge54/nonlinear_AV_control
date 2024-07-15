@@ -303,6 +303,9 @@ x_e\\y_e
 
 Reinforcement learning is a type of machine learning that is used to train an agent to make decisions in an environment. The agent learns by interacting with the environment and receiving rewards or penalties for its actions. In this project, I will be using reinforcement learning to train an agent to control an autonomous vehicle to follow a time-varying trajectory. For this project the most popular reinforcement learning algorithm, Proximal Polixy Optimization (PPO) was chosen.
 
+**The enviroment structure and ppo implementation adapted from a simlar repo written by [Kyle A. Williams](https://github.com/kwilliams319) [8] **
+
+
 ### PPO Algorithm
 
 Proximal Policy Optimization (PPO) is a policy gradient method that is used to train agents in reinforcement learning. PPO is an on-policy algorithm, which means that it learns from the data that it collects during training. PPO is designed to be more stable and sample-efficient than other policy gradient methods, such as REINFORCE or TRPO. PPO works by optimizing a surrogate objective function that is a lower bound on the expected return of the policy. The surrogate objective function is optimized using stochastic gradient descent.
@@ -341,6 +344,7 @@ The final loss function is the sum of the policy loss, the value loss, and the a
 L(\theta) = L^{CLIP}(\theta) + L^{VF}(\theta) + L^{ACT}(\theta)
 ```
 
+
 ### Reward Function
 
 The reward function that is used to train the agent is defined as the following:
@@ -351,7 +355,6 @@ reward_close = 1 if norm([x_r, y_r, \theta_r] - [x_d, y_d, \theta_d]) < 1e-5 els
 reward = reward_distance + reward_close
 ```
 
-## Trajectory Generation
 
 ## Trajectory Generation
 
@@ -378,3 +381,5 @@ Figure \ref{fig:sim} shows an example simulation that can be generated. To devel
 6. The MathWorks Inc. (2022). _MATLAB and Automated Driving Toolbox (R2024a)_. Natick, Massachusetts, United States. <https://www.mathworks.com/help/driving/ref/drivingscenariodesigner-app.html>
 
 7. Bacha, S., Ayad, M. Y., Saadi, R., Kraa, O., Aboubou, A., & Hammoudi, M.Y. (2018). Autonomous Vehicle Path Tracking Using Nonlinear Steering Control and Input-Output State Feedback Linearization. In _2018 International Conference on Electrical Sciences and Technologies in Maghreb (CISTEM)_ (pp. 1-6). IEEE. <https://doi.org/10.1109/CISTEM.2018.8613365>
+
+8. Kyle A. Williams <https://github.com/kwilliams319>

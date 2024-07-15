@@ -53,7 +53,7 @@ class BikeModelEnv:
         """Perform as step in the enviroment and get the reward.
 
         Args:
-            action: the action the agents will perform size (n, 2)
+            action: the action the agents will perform. size (n, 2)
 
         Return:
             state for mlps, reward, done, []
