@@ -243,7 +243,7 @@ v \\
 
 With this expression of the dynamics, the control can be solved by left multiplying \eqref{eq:feedback_dyn} by the inverse of A.
 
-\begin{equation}
+```math
 \label{eq:control_lin_1}
 \begin{bmatrix}
 v_r \\
@@ -255,7 +255,7 @@ v_r \\
 \dot{x}_g \\
 \dot{y}_g
 \end{bmatrix}
-\end{equation}
+```
 
 The point, $(x_g, y_g)$, can be express its position relative to the desired point, $(x_d, y_d)$, instead of the current vehicle coordinates, $(x_r, y_r)$. This results in the error dynamics defined as the following.
 
@@ -270,8 +270,7 @@ y_e &= y_d - y_g
 
 Substituting \eqref{eq:xg} and \eqref{eq:yg} into \eqref{eq:control_lin_1} yields the following
 
-\begin{equation}
-\begin{bmatrix}
+```math
 v_r \\
 \dot{\theta_r}
 \end{bmatrix} = \begin{bmatrix}
@@ -281,7 +280,7 @@ v_r \\
 \dot{x}_d + k_1 x_e \\
 \dot{y}_d + k_2 y_e
 \end{bmatrix}
-\end{equation}
+```
 
 where \( k_1 \) and \( k_2 \) are the control gains. With the control defined stability must be verified. Substituting \eqref{eq:xg} and \eqref{eq:yg} into \eqref{eq:x_e} and \eqref{eq:y_e} results in
 
@@ -294,10 +293,7 @@ x_e\\y_e
 \end{bmatrix} \), is equal to itself times the negative control gains. Defining the candidate Lyapunov function to be \( V=.5e^Te \) the derivative can be taken.
 
 ```math
-\begin{equation}
-\label{eq:error_lyap}
 \dot{V} = e^T\dot{e} = k_1x_e^2-k_2x_e^2 < 0
-\end{equation}
 ```
 
 \eqref{eq:error_lyap} is negative definite ensuring that the error will converge to zero.
