@@ -1,4 +1,5 @@
 """setup.py install python code."""
+
 import os
 
 from setuptools import find_packages, setup
@@ -14,6 +15,6 @@ if os.path.isfile(requirementPath):
 setup(
     name="nonlinear_av_control",
     license="MIT",
-    install_requires=install_requires,
+    # install_requires=install_requires,
     packages=find_packages(),
 )

@@ -1,189 +1,119 @@
 import numpy as np
-import os
-import numpy.typing as npt
-from nonlinear_av_control.Utils import np_to_torch
+import torch
+import torch.nn as nn
 import matplotlib.pyplot as plt
+import os
 
 
-class Env:
-    """Class that houses an eviroment for having a bike follow a trajectory.
-
-    Attributes:
-        n (int): The number of instances of the environment.
-        window_size (int): The size of the window for the plot.
-        agent_state (npt.ArrayLike): The state of the agent.
-        n_in_out (tuple): The number of inputs and outputs for the model.
-        wheelbase (float): The wheelbase of the bike.
-        max_timesteps (int): The maximum number of timesteps.
-        thetad (npt.ArrayLike): The series of desired angle for each waypoint.
-        yd (npt.ArrayLike): The desired y position for each waypoint.
-        xd (npt.ArrayLike): The desired x position for each waypoint.
-        vd (npt.ArrayLike): The desired velocity for each waypoint.
-        omega_d (npt.ArrayLike): The desired angular velocity for each waypoint.
-        t_vec (npt.ArrayLike): The time vector for the waypoints.
-        ang_acc_d (npt.ArrayLike): The desired angular acceleration for each waypoint.
-        dt (float): The time step.
-        t (float): The current time.
-        x_y_history (npt.ArrayLike): The history of the x and y positions of the agent.
-        state (npt.ArrayLike): The state of the agent.
-        distance_to_waypoint (npt.ArrayLike): The distance to the waypoint.
-        fig (matplotlib.figure.Figure): The figure for the plot.
-        ax (matplotlib.axes.Axes): The axes for the plot.
-        pygame_init (bool): Whether pygame is initialized.
-        space_range (int): The range of the space.
-        draw_traj (bool): Whether the trajectory is drawn.
-    """
-
-    def __init__(self, n, dt=0.01, max_timesteps=1000) -> None:
-        """Initialize.
-
-        Args:
-            n (int): The number of instances of the environment.
-            dt (float, optional): The time step. Defaults to .01.
-            max_timesteps (int, optional): The maximum number of timesteps.
-                Defaults to 1000.
-        """
+class BikeModelEnv:
+    def __init__(self, n, dt, max_timesteps) -> None:
+        self.delta_t = 0.1
+        self.state = np.random.uniform(-25, 25, (n, 3))
+        self.state[:, 2] = np.random.uniform(-np.pi, np.pi, n)
         self.n = n
-        self.window_size = 1000
-        self.agent_state = np.zeros((n, 3), dtype=np.float32)
-        self.n_in_out = 3, 2
+        self.wheelbase = 2.8
+        self.space_size = 50
+        self.t = np.zeros(n)
+        self.max_t = max_timesteps
+        self.dt = dt
+        self.in_n_out = 6, 2
         file_total_path = os.path.join(
             os.path.dirname(__file__), "../data/output_acceleration.csv"
         )
         data = np.genfromtxt(file_total_path, delimiter=",", skip_header=1)
-        # Convert angles from degrees to radians
-        self.thetad = data[:, 0] * np.pi / 180
-        # x and y are swapped because of the sign convention of theta and theta_dot
-        self.wheelbase = 2.8
-        self.max_timesteps = max_timesteps
-        self.yd = data[:, 2]
-        self.xd = data[:, 1]
-        self.vd = data[:, 3]
-        self.omega_d = data[:, 4]
-        self.t_vec = data[:, 5]
-        self.ang_acc_d = data[:, 6]
-        self.dt = dt
-        self.t = 0.0
-        self.x_y_history = np.zeros((n, 2, max_timesteps), dtype=np.float32)
-        # set the inital state to the first waypoint with n number of instances
-        state = np.array([self.xd[0], self.yd[0], self.thetad[0]], dtype=np.float32)
-        # draw initial state from random uniform distribution with the shape
-        # (n, 3) with bounds -100, 100, -100, 100, -pi, pi
-        state = np.random.uniform(-100, 100, (n, 3))
-        state[:, 2] = np.random.uniform(-np.pi, np.pi, n)
-        self.state = state
-        # repeat this so that you have n number of instances
-        # self.state = np.repeat(state[np.newaxis, :], n, axis=0)
-        self.distance_to_waypoint = []
-        self.fig, self.ax = plt.subplots()
-        self.ax.set_xlim(0, self.window_size)
-        self.ax.set_ylim(0, self.window_size)
-        self.pygame_init = False
-        self.space_range = 1000
-        self.draw_traj = False
+        self.xd = data[:, 1] - data[:, 1][0]
+        self.yd = data[:, 2] - data[:, 2][0]
+        # self.thetad = data[:, 0] - data[:, 0][0]
+        # self.xd = np.random.uniform(-25, 25, (1,))
+        # self.yd = np.random.uniform(-25, 25, (1,))
+        self.thetad = np.random.uniform(0, 2 * np.pi, (1,))
 
     def step(self, action):
-        """Perform a step in the environment.
+        xd = self.xd[0]
+        yd = self.yd[0]
+        thetad = self.thetad[0]
 
-        Args:
-            action (npt.ArrayLike): The action to take.
-
-        Returns:
-            npt.ArrayLike: The state.
-            npt.ArrayLike: The reward.
-            bool: Whether the episode is done.
-            dict: The info.
-        """
-        index = int(np.floor(self.t * (1 / self.dt)) + 1)
-        index = 1400
-        # Gather the desired values for the next waypoint
-        thetar = self.thetad[index]
-        xr = self.xd[index]
-        yr = self.yd[index]
-        # get the current state of all instances
-        x = self.state[:, 0]
-        y = self.state[:, 1]
-        theta = self.state[:, 2]
-        thetadiff = thetar - theta
-        thetadiff = np.arctan(np.sin(thetadiff) / np.cos(thetadiff))
-        vec_diff = np.array([xr - x, yr - y, thetadiff])
-        # reward function
-        reward = np_to_torch(np.array([-np.linalg.norm(vec_diff)])) / 10
         v = action[:, 0]
         phi = action[:, 1]
-        # Update the state
+        theta = self.state[:, 2]
         dvdt = np.array(
-            [v * np.cos(theta), v * np.sin(theta), v * np.tan(phi) / self.wheelbase]
+            [
+                v * np.cos(theta),
+                v * np.sin(theta),
+                v * np.tan(phi) / self.wheelbase,
+            ]
         )
         dvdt = np.transpose(dvdt)
-        # euler integration
-        new_state = self.state + self.dt * dvdt
-        new_theta = new_state[:, 2]
-        # wrap the angle and use try except to catch the divide by zero error
-        try:
-            new_theta = np.arctan(np.sin(new_theta) / np.cos(new_theta))
-        except:
-            print("invalid value for theta")
-            print(new_theta)
-            raise
-        new_state[:, 2] = new_theta
+        new_state = self.state + dvdt * self.delta_t * self.dt
+        new_state[:, 2] = (
+            np.arctan2(np.sin(new_state[:, 2]), np.cos(new_state[:, 2]) + (2 * np.pi))
+        ) % (2 * np.pi)
         self.state = new_state
-        self.t += self.dt
-        done = False
-        if self.t >= self.max_timesteps * self.dt - 0.01:
-            done = True
-            self.distance_to_waypoint.append(
-                np.linalg.norm(np.mean(vec_diff[0:2], axis=1), axis=0)
-            )
-        return self.state, reward, done, {}
+        reward = np.zeros(self.n)
+        x, y = self.state[:, 0], self.state[:, 1]
+        xdiff = x - xd
+        ydiff = y - yd
 
-    def render(self):
-        """Render the environment."""
-        self.ax.set_xlim(0, self.window_size)
-        self.ax.set_ylim(0, self.window_size)
+        xy_diff = np.transpose(np.array([xdiff, ydiff]))
+        x_y_norm = np.linalg.norm(xy_diff, axis=1)
+        if_not_at_waypoint = x_y_norm > 1
+        reward[if_not_at_waypoint] -= x_y_norm[if_not_at_waypoint] / 50
+        diff_vec = np.array([xd, yd, thetad]) - self.state
+        diff_vec[:, 2] = (
+            np.arctan2(np.sin(diff_vec[:, 2]), np.cos(diff_vec[:, 2]) + (2 * np.pi))
+        ) % (2 * np.pi)
+        norm = np.linalg.norm(diff_vec, axis=1)
+        if_at_waypoint_and_pointing = norm < 0.01
+        not_quite_wp = np.logical_and(norm > 0.01, ~if_not_at_waypoint)
+        reward[if_at_waypoint_and_pointing] += 10
+        reward[not_quite_wp] -= norm[not_quite_wp] / (50 * 2 * np.pi)
+        done = np.logical_or(
+            np.abs(self.state[:, 0]) > self.space_size,
+            np.abs(self.state[:, 1]) > self.space_size,
+        )
+        reward[done] -= 10
+        self.selective_reset(done)
+        return self.get_state(), reward, done, None
 
-        self.ax.clear()
-        # Draw the trajectory
-        if not self.draw_traj:
-            self.draw_traj = True
-        self._draw_trajectory()
-
-        # Draw current position and orientation of the agent
-        self._draw_agent()
-
-    def _draw_trajectory(self):
-        len_desired = len(self.xd)
-        for i in range(len_desired - 1):
-            x1, y1 = self._transform_coordinates(self.xd[i], self.yd[i])
-            x2, y2 = self._transform_coordinates(self.xd[i + 1], self.yd[i + 1])
-            self.ax.plot([x1, x2], [y1, y2], "k-")
-
-    def _draw_agent(self):
-        x, y, theta = self.state.item(0), self.state.item(1), self.state.item(2)
-        x, y = self._transform_coordinates(x, y)
-        triangle = [
-            (x + 1 * np.cos(theta), y + 1 * np.sin(theta)),
-            (
-                x + 1 * np.cos(theta - 2 * np.pi / 3),
-                y + 1 * np.sin(theta - 2 * np.pi / 3),
-            ),
-            (
-                x + 1 * np.cos(theta + 2 * np.pi / 3),
-                y + 1 * np.sin(theta + 2 * np.pi / 3),
-            ),
-        ]
-        polygon = plt.Polygon(triangle, color="red")
-        self.ax.add_patch(polygon)
-
-    def _transform_coordinates(self, x, y):
-        return x, y
+    def selective_reset(self, done):
+        count = np.count_nonzero(done)
+        if count > 0:
+            self.state[done] = np.random.uniform(-25, 25, (count, 3))
+            self.state[done][:, 2] = np.random.uniform(-np.pi, np.pi, count)
+            self.t[done] = 0.0
 
     def reset(self):
-        """Reset the environment."""
-        state = np.random.uniform(-100, 100, (self.n, 3))
-        state[:, 2] = np.random.uniform(-np.pi, np.pi, self.n)
-        self.state = state
-        self.t = 0.0
-        # self.state = np.repeat(state[np.newaxis, :], self.n, axis=0)
-        self.distance_to_waypoint = []
-        return self.state
+        done = np.ones(self.n, dtype=bool)
+        self.selective_reset(done)
+        self.thetad = np.random.uniform(0, 2 * np.pi, (1,))
+        return self.get_state()
+
+    def get_state(self):
+        repeat_goal = np.tile(
+            np.array([self.xd.item(0), self.yd.item(0), self.thetad.item(0)]),
+            (self.n, 1),
+        )
+        return np.hstack([self.state, repeat_goal]) / np.array(
+            [
+                self.space_size,
+                self.space_size,
+                np.pi,
+                self.space_size,
+                self.space_size,
+                np.pi,
+            ]
+        )
+
+    def render(self):
+        goalx = self.xd.item(0)
+        goaly = self.yd.item(0)
+        goaltheta = self.thetad.item(0)
+        goalu, goalv = np.cos(goaltheta), np.sin(goaltheta)
+        plt.quiver(goalx, goaly, goalu, goalv, color="g", alpha=0.2)
+        x, y, theta = self.state[:, 0], self.state[:, 1], self.state[:, 2]
+        u, v = np.cos(theta), np.sin(theta)
+        plt.quiver(x, y, u, v, headwidth=1, pivot="mid", color="r", alpha=1)
+        plt.axis("square")
+        plt.xlim(-self.space_size, self.space_size)
+        plt.ylim(-self.space_size, self.space_size)
+        plt.pause(0.01)
