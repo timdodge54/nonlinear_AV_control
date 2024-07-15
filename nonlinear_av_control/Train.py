@@ -17,16 +17,24 @@ def numpy_to_torch(array):
 
 
 class Writer:
+    """Summary writter wrapper.
+    writer: the summary writer
+    frame_idx: current frame index
+    """
+
     def __init__(self):
+        """Init."""
         self.writer = SummaryWriter()
         self.frame_idx = 0
 
     def track_training(self, actor_loss, critic_loss):
+        """Track a training iteration."""
         self.writer.add_scalar("actor_loss", actor_loss, self.frame_idx)
         self.writer.add_scalar("critic_loss", critic_loss, self.frame_idx)
         self.frame_idx += 1
 
     def track_rewards(self, rewards):
+        """Track test iteration."""
         self.writer.add_scalar("rewards", rewards, self.frame_idx)
 
 
@@ -42,6 +50,20 @@ class Hypers:
 
 
 class TrajectoryData:
+    """Data class that houses trajectory data and performs gae estimates.
+
+    Attributes:
+        n_steps: the number of steps in a trajectory
+        n_envs: the number of parallell enviroments
+        states: states of the trajectory
+        values:
+        actions:
+        rewards:
+        not_done_masks:
+        returns:
+        advatages
+    """
+
     def __init__(self, n_inputs, n_outputs, n_steps, n_envs):
         self.n_steps = n_steps
         self.n_envs = n_envs
@@ -84,6 +106,16 @@ class TrajectoryData:
 
 
 class PPO:
+    """The class that performs the ppo training
+
+    Attributes:
+        env: the bike model env
+        model: actor critic model
+        optimizer: torch optimizer
+        t_data: the trajectory data class
+        writer: the summary writer
+    """
+
     def __init__(self):
         self.env = BikeModelEnv(Hypers.n_envs, 0.1, Hypers.steps)
         in_, out_ = self.env.in_n_out
@@ -95,6 +127,7 @@ class PPO:
         self.writer = Writer()
 
     def collect_rollouts(self):
+        """Collecty a trajectory of data."""
         state = numpy_to_torch(self.env.reset())
         with torch.no_grad():
             for i in range(Hypers.steps):
@@ -119,6 +152,7 @@ class PPO:
             self.t_data.calc_gae_returns_advantage()
 
     def update_policy(self):
+        """Update the policy."""
         for _ in range(Hypers.ppo_epochs):
             values = self.model.critic(self.t_data.states)
             critic_loss = (self.t_data.returns - values).pow(2).mean()
@@ -141,6 +175,7 @@ class PPO:
         self.writer.track_training(actor_loss.item(), critic_loss.item())
 
     def test(self):
+        """Test a trajectory and gather test reward."""
         state = self.env.reset()
         test_reward = 0.0
         with torch.no_grad():
@@ -151,6 +186,7 @@ class PPO:
             self.writer.track_rewards(test_reward)
 
     def train(self):
+        """Training loop."""
         for i in count(0):
             self.collect_rollouts()
             self.update_policy()
@@ -163,7 +199,8 @@ class PPO:
                 print(f"Episode {i} complete...")
 
 
-def train():
+def main():
+    """Main init."""
     torch.autograd.set_detect_anomaly(True)
     ppo = PPO()
     model_name = os.path.join(os.path.dirname(__file__), "../models/model_copy.pt")
@@ -172,4 +209,4 @@ def train():
 
 
 if __name__ == "__main__":
-    train()
+    main()
