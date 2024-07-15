@@ -6,8 +6,29 @@ import os
 
 
 class BikeModelEnv:
+    """Class for training got to waypoint with bike model dynamics.
+
+    Attributes:
+        state: the state of the agents with shape (n, 3) state is ordered
+            (x, y, theta)
+        n: number of parallel enviroments
+        wheelbase: the distance between the centerpoints of the wheel looking at
+            the profile
+        max_t: the max number of timesteps
+        dt: the integration time step
+        xd: the desired x positions (starting at 0)
+        yd: the desired y positions (starting at 0)
+        thetad: the desired orientation (not neccesarily starting at 0)
+    """
+
     def __init__(self, n, dt, max_timesteps) -> None:
-        self.delta_t = 0.1
+        """Initialize.
+
+        Args:
+            n: the number of parallel enviroments
+            dt: the integration time step
+            max_timesteps: the max number of simulation timesteps
+        """
         self.state = np.random.uniform(-25, 25, (n, 3))
         self.state[:, 2] = np.random.uniform(-np.pi, np.pi, n)
         self.n = n
@@ -29,6 +50,14 @@ class BikeModelEnv:
         self.thetad = np.random.uniform(0, 2 * np.pi, (1,))
 
     def step(self, action):
+        """Perform as step in the enviroment and get the reward.
+
+        Args:
+            action: the action the agents will perform size (n, 2)
+
+        Return:
+            state for mlps, reward, done, []
+        """
         xd = self.xd[0]
         yd = self.yd[0]
         thetad = self.thetad[0]
@@ -44,7 +73,7 @@ class BikeModelEnv:
             ]
         )
         dvdt = np.transpose(dvdt)
-        new_state = self.state + dvdt * self.delta_t * self.dt
+        new_state = self.state + dvdt * self.dt
         new_state[:, 2] = (
             np.arctan2(np.sin(new_state[:, 2]), np.cos(new_state[:, 2]) + (2 * np.pi))
         ) % (2 * np.pi)
@@ -70,10 +99,17 @@ class BikeModelEnv:
             np.abs(self.state[:, 1]) > self.space_size,
         )
         reward[done] -= 10
+        done = done & if_at_waypoint_and_pointing
         self.selective_reset(done)
         return self.get_state(), reward, done, None
 
     def selective_reset(self, done):
+        """Selectivly resets the enviroments that are finished:
+
+        Args:
+            done: boolean array that indicates if enviroment is done shape
+                (n,1)
+        """
         count = np.count_nonzero(done)
         if count > 0:
             self.state[done] = np.random.uniform(-25, 25, (count, 3))
@@ -81,12 +117,19 @@ class BikeModelEnv:
             self.t[done] = 0.0
 
     def reset(self):
+        """Reset all enviroments."""
         done = np.ones(self.n, dtype=bool)
         self.selective_reset(done)
         self.thetad = np.random.uniform(0, 2 * np.pi, (1,))
         return self.get_state()
 
     def get_state(self):
+        """Get the normalized state for the actor and the critic.
+
+        Returns:
+            the state and goal concatinated with shape (n,6)
+            (x, y, theta, xd, yd, thetad)/(ss, ss, pi, ss, ss, pi)
+        """
         repeat_goal = np.tile(
             np.array([self.xd.item(0), self.yd.item(0), self.thetad.item(0)]),
             (self.n, 1),
@@ -103,6 +146,7 @@ class BikeModelEnv:
         )
 
     def render(self):
+        """Render current state and goal."""
         goalx = self.xd.item(0)
         goaly = self.yd.item(0)
         goaltheta = self.thetad.item(0)
