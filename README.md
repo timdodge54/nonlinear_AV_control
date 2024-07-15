@@ -271,6 +271,7 @@ y_e &= y_d - y_g
 Substituting \eqref{eq:xg} and \eqref{eq:yg} into \eqref{eq:control_lin_1} yields the following
 
 ```math
+\begin{bmatrix}
 v_r \\
 \dot{\theta_r}
 \end{bmatrix} = \begin{bmatrix}
